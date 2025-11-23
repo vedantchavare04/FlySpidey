@@ -12,8 +12,8 @@ pygame.display.set_caption("FlySpidey")
 clock=pygame.time.Clock()
 
 # spidey
-spider_x=0
-spider_y=100
+spider_x=WIDTH/12
+spider_y=HEIGHT/1
 spider_width=100
 spider_height=150
 
@@ -42,21 +42,35 @@ enemies=[]
 
 velocity_x=-2
 velocity_y=0
+gravity=0.4
+Score=0
+game_over=False
 
-def move():
-    spidey.y=velocity_y
-    for enemy_2 in enemies:
-        enemy_2.x+=velocity_x
-
-    while len(enemies) > 0 and enemies[0].x < enemy1_width:
-        enemies.pop(0)
-# for spider
 class Spider(pygame.Rect):
     def __init__(self,img):
         pygame.Rect.__init__(self,spider_x,spider_y,spider_width,spider_height)
         self.img=img
 
 spidey=Spider(resized_image)
+
+def move():
+    global velocity_y, Score, game_over
+    velocity_y+=gravity
+    spidey.y=velocity_y
+    spidey.y=max(spidey.y,0)
+
+    for enemy_2 in enemies:
+        enemy_2.x+=velocity_x
+
+        if not enemy_2.passed and spidey.x>enemy_2.x+enemy_2.width:
+            Score+=0.5
+            enemy_2.passed=True
+
+        if spidey.colliderect(enemy_2):
+            game_over = True
+            return
+    while len(enemies) > 0 and enemies[0].x < enemy1_width:
+        enemies.pop(0)
 
 # for enemy
 class Enemy(pygame.Rect):
@@ -84,6 +98,12 @@ def draw():
     for enemy_draw in enemies:
         window.blit(enemy_draw.img,enemy_draw)
 
+    text_str=str(int(Score))
+    if game_over:
+        text_str="Game over: "+text_str
+    text_font=pygame.font.SysFont("Comic Sans MS",45)
+    text_render = text_font.render(text_str, True, "white")
+    window.blit(text_render, (5, 0))
 
 while True:
     for event in pygame.event.get():
@@ -91,13 +111,21 @@ while True:
             pygame.quit()
             sys.exit()
 
-        if event.type==create_enemies_timer:
+        if event.type==create_enemies_timer and not game_over:
             create_enemies()
 
         if event.type==pygame.KEYDOWN:
+            if event.key in (pygame.K_SPACE,pygame.K_x,pygame.K_UP):
+                velocity_y=-6
 
+                if game_over:
+                    spidey.y = spider_y
+                    enemies.clear()
+                    score = 0
+                    game_over = False
 
-    move()
-    draw()
-    pygame.display.update()
-    clock.tick(60)
+    if not game_over:
+        move()
+        draw()
+        pygame.display.update()
+        clock.tick(60)
