@@ -1,63 +1,103 @@
 import random
 import sys
 import pygame
-from pygame.locals import *
 
-FPS=32
-SCREENWIDTH=600
-SCREENHEIGHT=340
-SCREEN=pygame.display.set_mode((SCREENWIDTH,SCREENHEIGHT))
-GROUNDY=SCREENHEIGHT*0.8
-GAME_IMAGE={}
-GAME_SOUND={}
+
+WIDTH=736
+HEIGHT=414
+
+pygame.init()
+window=pygame.display.set_mode((WIDTH,HEIGHT))
+pygame.display.set_caption("FlySpidey")
+clock=pygame.time.Clock()
+
+# spidey
+spider_x=0
+spider_y=100
+spider_width=100
+spider_height=150
+
+# enemy
+enemy1_width=60
+enemy1_height=100
+enemy_x=WIDTH
+enemy_y=0
 
 # SPIDER= "C:/Users/Vedant/PycharmProjects/PythonProject70/media/images/spider.png"
-BACKGROUND="C:/Users/Vedant/PycharmProjects/PythonProject70/media/images/city.jpg"
-ENEMY="C:/Users/Vedant/PycharmProjects/PythonProject70/media/images/enemy.png"
+BACKGROUND="C:/Users/Vedant/PycharmProjects/PythonProject70/media/images/bg_city.jpg"
+# ENEMY="C:/Users/Vedant/PycharmProjects/PythonProject70/media/images/enemy.png"
 SOUND="C:/Users/Vedant/PycharmProjects/PythonProject70/media/sound/bg_sound.MP3"
+GO_SOUND="C:/Users/Vedant/PycharmProjects/PythonProject70/media/sound/game_over.MP3"
 
 spider = pygame.image.load("C:/Users/Vedant/PycharmProjects/PythonProject70/media/images/spider.png")
-resized_image = pygame.transform.scale(spider, (100, 150))
+resized_image = pygame.transform.scale(spider, (spider_width, spider_height))
 
-# def main_game():
-#     # your main game loop here
-#     while True:
-#         for event in pygame.event.get():
-#             if event.type == QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-#         # update game, draw, etc.
-#         pygame.display.update()
-#         FPSCLOCK.tick(FPS)
-
-def welcome_screen():
-    plx = int(SCREENWIDTH / -20)
-    ply = int((SCREENHEIGHT - GAME_IMAGE['spider'].get_height()) / 2)
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type==KEYDOWN and event.key==K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-
-            elif event.type==KEYDOWN and (event.key==K_SPACE or event.key==K_UP or event.key == K_DOWN):
-                sys.exit()
-            else:
-                SCREEN.blit(GAME_IMAGE['background'],(0,0))
-                SCREEN.blit(GAME_IMAGE['spider'], (plx, ply))
-                pygame.display.update()
-                FPSCLOCK.tick(FPS)
+enemy=pygame.image.load("C:/Users/Vedant/PycharmProjects/PythonProject70/media/images/enemy.png")
+resized_enemy = pygame.transform.scale(enemy, (enemy1_width, enemy1_height))
 
 
-if __name__ == '__main__':
-    pygame.init()
-    FPSCLOCK=pygame.time.Clock()
-    pygame.display.set_caption("FlySpidey")
-    GAME_IMAGE['message']=pygame.image.load(BACKGROUND).convert_alpha()
-    GAME_SOUND['die']=pygame.mixer.Sound(SOUND)
-    GAME_IMAGE['background'] = pygame.image.load(BACKGROUND).convert()
-    GAME_IMAGE['enemy']=pygame.image.load(ENEMY).convert_alpha()
-    GAME_IMAGE['spider'] =resized_image.convert_alpha()
+backgroundImage=pygame.image.load(BACKGROUND)
 
-    while True:
-        welcome_screen()
+enemies=[]
+
+velocity_x=-2
+velocity_y=0
+
+def move():
+    spidey.y=velocity_y
+    for enemy_2 in enemies:
+        enemy_2.x+=velocity_x
+
+    while len(enemies) > 0 and enemies[0].x < enemy1_width:
+        enemies.pop(0)
+# for spider
+class Spider(pygame.Rect):
+    def __init__(self,img):
+        pygame.Rect.__init__(self,spider_x,spider_y,spider_width,spider_height)
+        self.img=img
+
+spidey=Spider(resized_image)
+
+# for enemy
+class Enemy(pygame.Rect):
+    def __init__(self, img):
+        pygame.Rect.__init__(self, enemy_x, enemy_y, enemy1_width, enemy1_height)
+        self.img = img
+        self.passed = False
+
+def create_enemies():
+    rand_y=random.randint(5,300)
+
+    enemy_1=Enemy(resized_enemy)
+    enemy_1.y = rand_y
+    enemies.append(enemy_1)
+
+    print(len(enemies))
+
+create_enemies_timer=pygame.USEREVENT+0
+pygame.time.set_timer(create_enemies_timer,1500)
+
+def draw():
+    window.blit(backgroundImage,(0,0))
+    window.blit(spidey.img,spidey)
+
+    for enemy_draw in enemies:
+        window.blit(enemy_draw.img,enemy_draw)
+
+
+while True:
+    for event in pygame.event.get():
+        if event.type==pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        if event.type==create_enemies_timer:
+            create_enemies()
+
+        if event.type==pygame.KEYDOWN:
+
+
+    move()
+    draw()
+    pygame.display.update()
+    clock.tick(60)
