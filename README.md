@@ -3,7 +3,7 @@
 
 FlySpidey is a fun Python game developed using the Pygame library. The objective of the game and core gameplay mechanics can be customized based on your design. The game is built and executed in PyCharm, with the main logic running through the main.py file.
 
-**Requirements**
+**Requirements-**
 
 Make sure you have the following installed:
 
@@ -39,7 +39,7 @@ Or click the Run button in PyCharm.
 
 Click up arrow to fly spidey upwards
 
-**Game Features**
+**Game Features-**
 
 Tackle green goblin using one upward control
 
